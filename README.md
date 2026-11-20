@@ -104,3 +104,5 @@ During an actual call, the panel shows elapsed waiting time after receiving user
 ## Deploy
 
 Import the existing GitHub repository into Vercel, use the Next.js preset, and set the variables from `.env.example` for the appropriate deployment environment. Run migrations against the target Supabase project before exposing the app. Set the public HTTPS callback origin and Supabase Auth URLs for that deployment. Configure the cleanup schedule described above. Server routes use the Node runtime and are Vercel-compatible. There is no filesystem-backed runtime database and no dependency on a persistent application process.
+
+Voice submission consent is checked outside the model: the user must confirm in a new turn after plan selection. The relay grants a short-lived submission permission bound to the tool-call ID, user turn, selected plan and evaluation fingerprint. The callback rejects a model-only `confirmed: true`. Requests to explain costs before submitting never authorize a write. Ambiguous speech requires another question or the ordinary confirmation controls.

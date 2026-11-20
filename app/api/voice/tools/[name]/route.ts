@@ -1,3 +1,5 @@
+import { canSubmitVoice } from "@/lib/voice/confirmation";
+import { object } from "@/lib/voice/chat";
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import { adminClient } from "@/lib/supabase/server";
@@ -123,9 +125,12 @@ export async function POST(
           .update({ selected_plan_key: plan.key })
           .eq("id", id);
         if (saveError) throw new Error(saveError.message);
+        await updateVoiceState(session.id, (state) => ({ ...state, _selectionUserTurn: object(session.tool_state)._latestUserTurn, _submissionCalls: {} }));
         result = { selected_plan: plan, requires_confirmation: true };
       } else if (name === "createChangeProposal") {
         z.literal(true).parse(input.confirmed);
+        if (!canSubmitVoice(session.tool_state, requestKey, input.plan_key, session.evaluation))
+          throw new Error("Submission needs a separate, explicit user confirmation after plan selection. Explain sizes and costs, then ask: Shall I submit this proposal for production approval?");
         const evaluation = session.evaluation as Evaluation | null;
         if (!evaluation)
           throw new Error(
