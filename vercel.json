@@ -1,3 +1,1 @@
-{
-  "crons": [{ "path": "/api/voice/cleanup", "schedule": "*/5 * * * *" }]
-}
+{}
