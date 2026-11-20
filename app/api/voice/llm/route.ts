@@ -1,4 +1,4 @@
-import { fingerprint, submissionConsent } from "@/lib/voice/confirmation";
+import { fingerprint, hasSubmissionResult, submissionConsent } from "@/lib/voice/confirmation";
 import { request as httpsRequest } from "node:https";
 import { authenticateVoice, updateVoiceState } from "@/lib/voice/session-auth";
 import { captureSignatures, completionEvents, object, restoreSignatures } from "@/lib/voice/chat";
@@ -14,9 +14,10 @@ export async function POST(request: Request) {
     if (Buffer.byteLength(text) > 1_000_000) return new Response("Request too large", { status: 413 });
     const input = object(JSON.parse(text));
     if (!Array.isArray(input.messages) || input.messages.length > 100) throw new Error("Invalid conversation.");
-    const consent = submissionConsent(input.messages.map(object));
+    const messages = input.messages.map(object);
+    const consent = submissionConsent(messages);
     const maySubmit = consent.allowed && session.selected_plan_key && object(session.tool_state)._selectionUserTurn && object(session.tool_state)._selectionUserTurn !== consent.turn;
-    await updateVoiceState(session.id, (state) => ({ ...state, _latestUserTurn: consent.turn }));
+    await updateVoiceState(session.id, (state) => ({ ...state, _latestUserTurn: consent.turn, _submissionCheck: { recognized: consent.allowed, planSelected: Boolean(session.selected_plan_key), selectionRecorded: Boolean(object(session.tool_state)._selectionUserTurn), separateTurn: object(session.tool_state)._selectionUserTurn !== consent.turn, enabled: Boolean(maySubmit) } }));
     const payload = JSON.stringify({
       model: process.env.GEMINI_MODEL,
       messages: restoreSignatures(input.messages.map(object), object(object(session.tool_state)._llmToolMetadata)),
@@ -24,7 +25,9 @@ export async function POST(request: Request) {
         const tool = object(value);
         return { type: "function", function: tool.function };
       }) } : {}),
-      ...(input.tool_choice ? { tool_choice: input.tool_choice } : {}),
+      ...(maySubmit && !hasSubmissionResult(messages)
+        ? { tool_choice: { type: "function", function: { name: "createChangeProposal" } } }
+        : input.tool_choice ? { tool_choice: input.tool_choice } : {}),
       reasoning_effort: "low", max_tokens: 2048, stream: false,
     });
     phase = "requesting Gemini";

@@ -1,6 +1,18 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { canSubmitVoice, fingerprint, submissionConsent } from "../lib/voice/confirmation";
+import { canSubmitVoice, fingerprint, hasSubmissionResult, submissionConsent } from "../lib/voice/confirmation";
+
+test("OpenAI text-part messages carry the same consent as plain strings", () => {
+  assert.equal(submissionConsent([ask, { role: "user", content: [{ type: "text", text: "Yes. Submit for production approval." }] }]).allowed, true);
+  assert.equal(submissionConsent([ask, { role: "user", content: [{ type: "text", text: "Explain cost before submitting." }] }]).allowed, false);
+});
+test("confirmed submission is forced only until its tool result arrives", () => {
+  const messages = [{ role: "user", content: "Submit the proposal" }, { role: "assistant", tool_calls: [{ id: "one", function: { name: "createChangeProposal" } }] }];
+  assert.equal(hasSubmissionResult(messages), false);
+  const completed = [...messages, { role: "tool", tool_call_id: "one", content: "persisted" }];
+  assert.equal(hasSubmissionResult(completed), true);
+  assert.equal(hasSubmissionResult([...completed, { role: "user", content: "Submit the proposal" }]), false);
+});
 
 const ask = { role: "assistant", content: "Sizes are S 120, M 180, L 180, XL 120. Split freight cost is unavailable. Shall I submit this proposal?" };
 test("explanation and selection are not submission consent, even after an earlier confirmation question", () => {
