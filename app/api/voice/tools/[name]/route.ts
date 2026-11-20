@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import { adminClient } from "@/lib/supabase/server";
-import { hashToken, verifyToolToken } from "@/lib/voice/security";
+import { authenticateVoice, updateVoiceState } from "@/lib/voice/session-auth";
 import { apiError } from "@/lib/http";
 import { evaluateChange } from "@/lib/calculations";
 import { changeSchema } from "@/lib/validation";
@@ -13,20 +13,7 @@ export async function POST(
 ) {
   let id: string | undefined;
   try {
-    const token =
-      request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
-    const signed = verifyToolToken(token, process.env.AGORA_TOOL_SECRET ?? "");
-    const db = adminClient();
-    const { data: session, error: sessionError } = await db
-      .from("voice_sessions")
-      .select("*")
-      .eq("id", signed.sessionId)
-      .eq("token_hash", hashToken(token))
-      .in("status", ["starting", "active"])
-      .gt("expires_at", new Date().toISOString())
-      .maybeSingle();
-    if (sessionError || !session)
-      throw new Error("Unauthorized or expired voice session.");
+    const { db, session } = await authenticateVoice(request);
     id = session.id;
     const { name } = await params;
     const input = await request.json();
@@ -41,18 +28,8 @@ export async function POST(
       createChangeProposal: "Preparing change proposal",
     };
     if (!names[name]) throw new Error("Unknown voice tool.");
-    const { error: progressError } = await db
-      .from("voice_sessions")
-      .update({
-        tool_state: {
-          operation: names[name],
-          running: true,
-          at: new Date().toISOString(),
-        },
-        last_error: null,
-      })
-      .eq("id", id);
-    if (progressError) throw new Error(progressError.message);
+    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], running: true, at: new Date().toISOString() }));
+    await db.from("voice_sessions").update({ last_error: null }).eq("id", id);
     const { data: snapshot, error } = await db.rpc("workspace_snapshot", {
       p_org: session.organization_id,
       p_actor: session.user_id,
@@ -183,16 +160,7 @@ export async function POST(
         if (saveError) throw new Error(saveError.message);
       }
     }
-    await db
-      .from("voice_sessions")
-      .update({
-        tool_state: {
-          operation: names[name],
-          running: false,
-          at: new Date().toISOString(),
-        },
-      })
-      .eq("id", id);
+    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], running: false, at: new Date().toISOString() }));
     return Response.json({ ok: true, result });
   } catch (e) {
     if (id)
@@ -200,9 +168,10 @@ export async function POST(
         .from("voice_sessions")
         .update({
           last_error: e instanceof Error ? e.message : "Tool failed",
-          tool_state: { running: false },
+
         })
         .eq("id", id);
+    if (id) await updateVoiceState(id, (state) => ({ ...state, running: false })).catch(() => {});
     return apiError(e);
   }
 }

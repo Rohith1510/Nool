@@ -1,3 +1,4 @@
+import { publicProgress } from "@/lib/voice/chat";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { RtcTokenBuilder, RtcRole } from "agora-token";
@@ -177,7 +178,7 @@ export async function GET(request: Request) {
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) throw new Error("Session not found.");
-    return Response.json(data, {
+    return Response.json({ ...data, tool_state: publicProgress(data.tool_state) }, {
       headers: { "Cache-Control": "private, no-store" },
     });
   } catch (e) {

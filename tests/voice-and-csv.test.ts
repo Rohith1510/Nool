@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { parseStockCsv } from "../lib/csv";
 import { issueToolToken, verifyToolToken } from "../lib/voice/security";
-import { toolDefinitions } from "../lib/voice/config";
+import { toolDefinitions, agentConfiguration } from "../lib/voice/config";
+import { summarizeAgentFailure } from "../lib/voice/diagnostics";
+import { readFileSync } from "node:fs";
 import { TranscriptDecoder } from "../lib/voice/transcripts";
 import { describeChanges } from "../lib/changes";
 import { evaluateChange } from "../lib/calculations";
@@ -94,4 +96,91 @@ test("stale explanations name the changed stock and line capacity", () => {
       c.includes("Line B, 2026-11-25: standard capacity 100 → 200"),
     ),
   );
+});
+test("Gemini uses standard chat/tool history with bounded low reasoning", (t) => {
+  const previous = process.env.APP_URL;
+  process.env.APP_URL = "https://nool.example";
+  t.after(() => {
+    if (previous === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = previous;
+  });
+  const w = sampleWorkspace();
+  const config = agentConfiguration({
+    sessionId: "test",
+    channel: "test",
+    agentToken: "test",
+    toolToken: "test",
+    workspace: w,
+    order: w.orders[0],
+  });
+  assert.equal(config.properties.turn_detection.config.end_of_speech.mode, "vad");
+  assert.equal(config.properties.turn_detection.config.end_of_speech.vad_config.silence_duration_ms, 800);
+  assert.equal(config.properties.llm.api_key, "test");
+  assert.equal(config.properties.llm.style, "openai");
+  assert.equal(
+    config.properties.llm.url,
+    "https://nool.example/api/voice/llm",
+  );
+  assert.equal(config.properties.llm.system_messages[0].role, "system");
+  assert.equal(config.properties.llm.params.reasoning_effort, "low");
+  assert.equal(config.properties.llm.params.max_tokens, 1024);
+  assert.ok(
+    config.properties.llm.system_messages[0].content.includes(
+      w.orders[0].committed_ship_date,
+    ),
+  );
+});
+test("provider diagnostics identify overload and history errors without exposing details", () => {
+  const turn = (code: number, message: string) => ({
+    end: {
+      type: "error",
+      metadata: { details: JSON.stringify({ error: { code, message } }) },
+    },
+  });
+  assert.match(summarizeAgentFailure([turn(503, "High demand")])!, /503/);
+  assert.match(
+    summarizeAgentFailure([
+      turn(400, "Requests ending with a model turn are not supported."),
+    ])!,
+    /format/,
+  );
+  const safe = summarizeAgentFailure([
+    turn(500, "secret-key-in-provider-url"),
+  ])!;
+  assert.ok(!safe.includes("secret-key"));
+  assert.match(
+    summarizeAgentFailure([
+      {
+        end: {
+          type: "error",
+          metadata: {
+            details: JSON.stringify([
+              { error: { code: 503, message: "High demand" } },
+            ]),
+          },
+        },
+      },
+    ])!,
+    /503/,
+  );
+  assert.equal(summarizeAgentFailure([{ end: { type: "ok" } }]), null);
+});
+test("voice interface strings do not contain the observed broken UTF-8 quotes", () => {
+  const source = readFileSync("components/voice-panel.tsx", "utf8");
+  assert.ok(!source.includes("\u00e2\u20ac"));
+  assert.ok(source.includes("&ldquo;"));
+});
+
+test("Gemini signatures survive an Agora round trip without reaching progress or SSE", async () => {
+  const { captureSignatures, restoreSignatures, publicProgress, completionEvents } = await import("../lib/voice/chat");
+  const signed = { role: "assistant", tool_calls: [{ id: "call_1", type: "function", function: { name: "evaluateOrderChange", arguments: "{}" }, extra_content: { google: { thought_signature: "opaque-test-signature" } } }] };
+  const metadata = captureSignatures(signed, {});
+  const stripped = { ...signed, tool_calls: signed.tool_calls.map((value) => ({ id: value.id, type: value.type, function: value.function })) };
+  assert.deepEqual(restoreSignatures([stripped], metadata)[0], signed);
+  const completion = { id: "test", choices: [{ message: signed, finish_reason: "tool_calls" }] };
+  const events = completionEvents(completion);
+  assert.ok(events.includes('"index":0'));
+  assert.ok(events.includes("[DONE]"));
+  assert.ok(!events.includes("opaque-test-signature"));
+  assert.deepEqual(publicProgress({ running: true, _llmToolMetadata: metadata }), { running: true, operation: undefined, at: undefined });
 });

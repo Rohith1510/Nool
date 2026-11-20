@@ -55,6 +55,10 @@ export function VoicePanel({
     [messages, setMessages] = useState<Transcript[]>([]),
     [session, setSession] = useState<Session | null>(null),
     [operation, setOperation] = useState(""),
+    [waitingSince, setWaitingSince] = useState<number | null>(null),
+    [waitSeconds, setWaitSeconds] = useState(0),
+    [lastSessionId, setLastSessionId] = useState<string | null>(null),
+    [checking, setChecking] = useState(false),
     [volume, setVolume] = useState(0);
   const clientRef = useRef<IAgoraRTCClient | null>(null),
     trackRef = useRef<IMicrophoneAudioTrack | null>(null),
@@ -99,6 +103,7 @@ export function VoicePanel({
     if (mounted.current) {
       setState("ending");
       setOperation("");
+      setWaitingSince(null);
     }
     await release();
     const current = sessionRef.current;
@@ -123,6 +128,14 @@ export function VoicePanel({
       if (mounted.current) setState("disconnected");
     }
   }, [release]);
+  useEffect(() => {
+    if (waitingSince === null) return;
+    const timer = setInterval(
+      () => setWaitSeconds(Math.floor((Date.now() - waitingSince) / 1000)),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [waitingSince]);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -255,6 +268,12 @@ export function VoicePanel({
       rtc.on("stream-message", (_uid, data) => {
         try {
           const message = decoder.decode(data);
+          if (message && mounted.current) {
+            if (message.role === "user") {
+              setWaitingSince(Date.now());
+              setWaitSeconds(0);
+            } else setWaitingSince(null);
+          }
           if (message && mounted.current)
             setMessages((prev) => {
               const index = prev.findIndex((m) => m.id === message.id);
@@ -309,6 +328,7 @@ export function VoicePanel({
         return;
       }
       setSession(result);
+      setLastSessionId(result.id);
       setMessages([]);
       await rtc.join(result.app_id, result.channel, result.token, result.uid);
       await rtc.publish(track);
@@ -399,9 +419,9 @@ export function VoicePanel({
               <Mic size={16} />
             )}{" "}
             {state === "connecting"
-              ? "Connectingâ€¦"
+              ? "Connecting..."
               : state === "ending"
-                ? "Endingâ€¦"
+                ? "Ending..."
                 : "Start conversation"}
           </Button>
         ) : (
@@ -433,12 +453,13 @@ export function VoicePanel({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
+            onClick={async () => {
               setError("");
-              if (state === "disconnected" && ready) void start();
+              if (connected || sessionRef.current) await end();
+              if (!sessionRef.current && ready) void start();
             }}
           >
-            Retry
+            {connected ? "Reconnect" : "Retry"}
           </Button>
         </div>
       )}
@@ -447,6 +468,56 @@ export function VoicePanel({
           <Loader2 size={15} className="spin" />
           {operation}
         </div>
+      )}
+      {connected && waitingSince !== null && !operation && (
+        <div className="tool-progress" role="status">
+          <Loader2 size={15} className="spin" />
+          <p>
+            {waitSeconds >= 12
+              ? "The agent is taking longer than expected."
+              : "Waiting for Nool's response..."}{" "}
+            <span className="mono">{waitSeconds}s</span>
+            {waitSeconds >= 12 && (
+              <span className="cell-secondary">
+                Check the provider response below, or continue with Evaluate
+                change.
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+      {lastSessionId && (!connected || waitSeconds >= 12) && (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={checking}
+          onClick={async () => {
+            setChecking(true);
+            try {
+              const result = await api<{ message: string }>(
+                `/api/voice/diagnostics?id=${lastSessionId}`,
+                undefined,
+                "GET",
+              );
+              setError(result.message);
+            } catch (e) {
+              setError(
+                e instanceof Error
+                  ? e.message
+                  : "Could not check the provider response.",
+              );
+            } finally {
+              setChecking(false);
+            }
+          }}
+        >
+          {checking ? (
+            <Loader2 size={14} className="spin" />
+          ) : (
+            <CircleHelp size={14} />
+          )}
+          Check agent response
+        </Button>
       )}
       <div className="transcript">
         <div className="section-heading">
@@ -468,7 +539,7 @@ export function VoicePanel({
               >
                 <span>{m.role === "user" ? "You" : "Nool"}</span>
                 <p>{m.text}</p>
-                {!m.final && <small>Transcribingâ€¦</small>}
+                {!m.final && <small>Transcribing...</small>}
               </div>
             ))}
           </div>
@@ -484,9 +555,12 @@ export function VoicePanel({
           <CircleHelp size={15} />
           Things you can ask
         </summary>
-        <p>â€œCan we increase this order to {order.quantity + 100} pieces?â€</p>
-        <p>â€œWould another production line help?â€</p>
-        <p>â€œWhat changes if we split the shipment?â€</p>
+        <p>
+          &ldquo;Can we increase this order to {order.quantity + 100}{" "}
+          pieces?&rdquo;
+        </p>
+        <p>&ldquo;Would another production line help?&rdquo;</p>
+        <p>&ldquo;What changes if we split the shipment?&rdquo;</p>
       </details>
       <div className="voice-footer">
         Recommendations are estimates.
