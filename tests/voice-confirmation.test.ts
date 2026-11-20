@@ -11,9 +11,16 @@ test("explanation and selection are not submission consent, even after an earlie
   ]) assert.equal(submissionConsent([ask, { role: "user", content }]).allowed, false, content);
 });
 test("a separate explicit submission confirmation is recognized", () => {
-  for (const content of ["Yes. Submit that proposal for production approval.", "Please submit the proposal", "Yes."])
+  for (const content of ["Yes. Submit that proposal for production approval.", "Yes. Submit for production approval.", "Submit for approval", "Please submit the proposal", "Yes."])
     assert.equal(submissionConsent([ask, { role: "user", content }]).allowed, true);
   assert.equal(submissionConsent([{ role: "user", content: "yes" }]).allowed, false);
+});
+test("ASR fragments preserve submission intent and preceding negation", () => {
+  assert.equal(submissionConsent([ask, { role: "user", content: "Yes. Submit" }]).allowed, false);
+  assert.equal(submissionConsent([ask, { role: "user", content: "Yes. Submit" }, { role: "user", content: "the proposal." }]).allowed, true);
+  assert.equal(submissionConsent([ask, { role: "user", content: "Do not" }, { role: "user", content: "submit the proposal." }]).allowed, false);
+  assert.equal(submissionConsent([ask, { role: "user", content: "Yes. Submit" }, { role: "user", content: "only after explaining the cost." }]).allowed, false);
+  assert.equal(submissionConsent([ask, { role: "user", content: "Explain the cost before" }, { role: "user", content: "submitting the proposal." }]).allowed, false);
 });
 test("grants bind submission to its call, latest user turn, plan, evaluation and expiry", () => {
   const evaluation = { quantity: 600, version: 1 };
