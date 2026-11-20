@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-20",
+  "scope": "app",
+  "review": "subagent finish review",
+  "first_word": "fix",
+  "findings": [
+    {
+      "issue": "Production and CSV values lost their headings on mobile",
+      "resolution": "Explicit data-label attributes on each relevant cell, visible mobile labels, and explicit semantic table roles and names",
+      "status": "resolved in source; connected-screen visual check requires Supabase"
+    },
+    {
+      "issue": "Approval fabric comparison conflated reservation and requirement",
+      "resolution": "Each value now names Existing reservation or Proposed requirement",
+      "status": "resolved in source"
+    },
+    {
+      "issue": "Startup instructions followed optional voice integration settings",
+      "resolution": "Moved core setup instructions before the readiness list in document order",
+      "status": "resolved and recaptured on desktop and mobile"
+    }
+  ],
+  "sweep": {
+    "files": 27,
+    "rendered_routes": ["/setup", "/sign-in"],
+    "viewport_widths": [320, 375, 414, 768, 1024, 1280, 1440, 1920],
+    "screenshots": 10,
+    "floor_failures": 0,
+    "reflex_findings": 0,
+    "warnings": 0,
+    "dismissals": [{ "gate": "70", "reason": "Task status is a persisted PostgreSQL value; controls use authenticated /api/resources writes. The detector mistook rendered status copy for a simulated success message." }]
+  },
+  "verification": {
+    "typecheck": "passed",
+    "eslint": "passed",
+    "production_build": "passed",
+    "focused_tests": "26 passed, including actual migration/RPC SQL in PGlite PostgreSQL",
+    "browser_smoke_tests": "4 passed on desktop and mobile against production build",
+    "browser_workflow_tests": "2 skipped: explicit hosted Supabase credentials and workflow opt-in absent",
+    "git_diff_check": "passed"
+  },
+  "gaps": [
+    "Connected operational screens reviewed in source, not visually captured with live Supabase data",
+    "Hosted Supabase Auth, Realtime, and two-connection lock contention require external configuration",
+    "Agora/Gemini/Murf real calls and code-mixed Tamil speech were not verified without credentials"
+  ],
+  "material": "No image slots or stand-ins. The most useful next evidence is a recorded English live call against the seeded Supabase company after provider configuration."
+}

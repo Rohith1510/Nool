@@ -1,0 +1,20 @@
+{
+  "scanned": "2026-11-20",
+  "scope": "app",
+  "findings": {
+    "framework": "package.json:16 — Next.js 16.4.6, React 19, App Router, npm lockfile",
+    "fonts": "Original app/layout.tsx:2 — scaffold Geist; replaced by requested Instrument Sans and IBM Plex Mono",
+    "palette": "Original app/globals.css:3 — scaffold neutrals; brief supplies ivory, charcoal, indigo, amber, green",
+    "motion": "No existing motion library",
+    "product": "Clean create-next-app scaffold; no existing product records or screenshots",
+    "instructions": "AGENTS.md — read installed Next.js documentation before implementation"
+  },
+  "preserve": ["Next.js App Router", "TypeScript", "Tailwind 4", "npm", "Cache Components", "Git history and repository instructions"],
+  "introduce": ["Brand tokens", "Shipment decision workbench", "Persistent conversation panel", "Operational tables", "Accessible responsive states"],
+  "material": {
+    "real": ["Nool / நூல்", "500 to 600 garment change scenario supplied in brief"],
+    "pictures": [],
+    "absent": ["Testimonials", "Customer logos", "Claimed usage metrics", "Product photography"],
+    "sample": "All invented company, buyer, and order fixture details are explicitly sample data and are inserted only by npm run seed."
+  }
+}

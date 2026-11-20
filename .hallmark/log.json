@@ -1,0 +1,15 @@
+[
+  {
+    "scope": "app",
+    "shape": "app screen",
+    "theme": "custom",
+    "axes": "light/grotesk/cool",
+    "nav": "compact top workspace tabs",
+    "footer": "quiet operational note",
+    "imagery": "product itself",
+    "signature": "Shipment plan comparison grounded in fabric and dated capacity with persistent live conversation",
+    "sections": ["Orders", "Order workspace", "Production", "Materials", "Approvals", "Setup and account"],
+    "waived": [],
+    "prompt": "Nool garment order decision workspace; ivory, charcoal, restrained indigo, Instrument Sans, IBM Plex Mono."
+  }
+]
