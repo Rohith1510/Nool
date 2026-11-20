@@ -50,6 +50,22 @@ test("v2 transcripts assemble out-of-order and duplicate chunks with Unicode int
   assert.equal(m?.final, true);
   assert.equal(m?.role, "user");
 });
+test("Gemini native tool parameters omit the unsupported keyword that broke live turns", () => {
+  const tools = toolDefinitions(
+    "https://nool.example",
+    "Bearer session-scoped",
+  );
+  // Actual provider rejection: Unknown name "additionalProperties" at
+  // tools[0].function_declarations[n].parameters. All six tools must conform.
+  const supported = new Set(["type", "properties", "required"]);
+  for (const tool of tools) {
+    const parameters = tool.function.parameters;
+    assert.equal(parameters.type, "object");
+    assert.ok(Object.keys(parameters).every((key) => supported.has(key)));
+    for (const name of parameters.required)
+      assert.ok(name in parameters.properties);
+  }
+});
 test("CSV reports invalid rows, handles quoted reasons and BOM", () => {
   const rows = parseStockCsv(
     '\uFEFFcode,delta_kg,reason\r\nSJ-180-ECR,25.500,"Received, checked"\r\nUNKNOWN,2,New stock\r\nSJ-180-ECR,0.0001,Bad precision',

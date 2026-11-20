@@ -18,7 +18,9 @@ export function toolDefinitions(appUrl: string, bearer: string) {
         type: "object",
         properties,
         required,
-        additionalProperties: false,
+        // Agora forwards this schema into Gemini's native `parameters` field.
+        // Its Schema dialect rejects additionalProperties (live HTTP 400).
+        // Tool inputs are validated separately by the authenticated backend.
       },
     },
     execution: { mode: "sync" },
