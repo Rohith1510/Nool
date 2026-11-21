@@ -1,0 +1,425 @@
+/* Hallmark · theme: custom Nool · genre: modern-minimal · shape: illustrated product story · hero: Counter · nav: edge-aligned · footer: garment commitment · modes: light+dark · v2.0.0 */
+/* Hallmark · critique: an unframed, pointer-responsive garment planning table replaces the rejected dashboard-card hero. */
+/* Hallmark · material: user selected a Hairline garment-table figure; example transcript is explicitly illustrative, calculation preview uses actual rules. */
+:root {
+  --font-hero-cursive: "Instrument Serif", Georgia, serif;
+  --scene-display: clamp(44px, 5.5vw, 80px);
+  --color-figure-edge: #727d70;
+  --color-figure-mid: #8e9b89;
+  --color-figure-lo: #bac5b5;
+}
+:root[data-mode="dark"] {
+  --color-figure-edge: #a0aaba;
+  --color-figure-mid: #7a8799;
+  --color-figure-lo: #4a5567;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]) {
+    --color-figure-edge: #a0aaba;
+    --color-figure-mid: #7a8799;
+    --color-figure-lo: #4a5567;
+  }
+}
+.landing-hero-scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(32px, 4vw, 64px);
+  min-height: min(760px, calc(100svh - 100px));
+  padding-block: 56px 64px;
+}
+.landing-hero-scene .landing-hero-copy {
+  text-align: left;
+}
+.landing-hero-scene h1 {
+  font-size: clamp(44px, 4.2vw, 68px);
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  max-width: 22ch;
+  text-wrap: balance;
+  margin-inline: 0;
+}
+.hero-cursive {
+  color: var(--color-accent);
+  font-family: var(--font-hero-cursive);
+  font-style: italic;
+  font-size: 1.1em;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+.landing-hero-scene .landing-hero-copy > p {
+  margin: 24px 0 0;
+  max-width: 36ch;
+  font-size: 18px;
+}
+.landing-hero-scene .landing-actions {
+  justify-content: flex-start;
+  margin-top: 28px;
+}
+.planning-scene {
+  position: relative;
+  margin: 0 auto;
+  width: min(700px, 100%);
+}
+.planning-stage {
+  --hairline-plate: var(--color-paper);
+  --hairline-hi: var(--color-ink);
+  --hairline-edge: var(--color-figure-edge);
+  --hairline-mid: var(--color-figure-mid);
+  --hairline-lo: var(--color-figure-lo);
+  --hairline-stroke: 1.1;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  position: relative;
+  max-height: 540px;
+}
+.planning-stage > svg {
+  width: 100%;
+  height: 100%;
+}
+.planning-scene figcaption {
+  position: absolute;
+  inset: 8px 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  padding: 0 24px;
+}
+.planning-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--color-ink);
+  min-height: 44px;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.planning-play:hover {
+  background: var(--color-paper-3);
+}
+.planning-play:active {
+  transform: translateY(1px);
+}
+.planning-play:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--color-rule);
+}
+.planning-play[aria-pressed="true"] {
+  border-color: var(--color-ink);
+}
+.planning-stage noscript p {
+  padding: 32px;
+  font-size: var(--text-sm);
+}
+.landing-voice-section {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  padding-block: 96px;
+  scroll-margin-top: 32px;
+}
+.landing-voice-preview {
+  margin: 48px 0 0;
+  border-top: 1px solid var(--color-field-border);
+  border-bottom: 1px solid var(--color-rule);
+}
+.voice-preview-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 24px;
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--color-rule);
+}
+.voice-preview-navigation > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.voice-preview-navigation > span:last-child {
+  color: var(--color-muted);
+}
+.voice-preview-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  gap: var(--landing-gap);
+  padding-block: 40px;
+}
+.voice-preview-order {
+  border-right: 1px solid var(--color-rule);
+  padding-right: 32px;
+}
+.voice-preview-order > span {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+.voice-preview-order h3 {
+  margin-top: 8px;
+  font-size: 28px;
+}
+.voice-preview-order > div {
+  margin-top: 28px;
+}
+.voice-preview-order div > span {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: 8px;
+}
+.voice-preview-order strong {
+  font-size: 28px;
+  font-weight: 400;
+}
+.voice-preview-order small {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+.voice-preview-order > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  font-size: var(--text-xs);
+  color: var(--color-success);
+}
+.voice-preview-order > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.voice-preview-question {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  background: var(--color-transcript-user);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  color: var(--color-ink);
+}
+.voice-preview-question svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.voice-preview-conversation .agent-tool {
+  margin-bottom: 28px;
+}
+.voice-preview-conversation .agent-tool summary {
+  font-size: var(--text-sm);
+}
+.voice-preview-response > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+}
+.voice-preview-response .agent-streaming-text {
+  font-size: 18px;
+  line-height: 1.8;
+}
+.voice-preview-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.voice-preview-choices button {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.voice-preview-choices button[aria-pressed="true"] {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+.voice-preview-choices button:hover {
+  background: var(--color-paper-3);
+}
+.voice-preview-choices button:active {
+  transform: translateY(1px);
+}
+.voice-preview-choices button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--color-rule);
+}
+.landing-voice-preview > figcaption {
+  padding-bottom: 24px;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+.landing-explore {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--landing-gap);
+  padding-block: 112px;
+}
+.landing-explore > div > p {
+  margin-top: 24px;
+  font-size: 18px;
+  color: var(--color-ink-2);
+  line-height: 1.8;
+  max-width: 35ch;
+}
+@media (max-width: 960px) {
+  .landing-hero-scene {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    gap: 16px;
+    padding-block: 32px 48px;
+  }
+  .landing-hero-scene .landing-hero-copy {
+    text-align: center;
+  }
+  .landing-hero-scene h1 {
+    margin-inline: auto;
+  }
+  .landing-hero-scene .landing-hero-copy > p {
+    margin-inline: auto;
+  }
+  .landing-hero-scene .landing-actions {
+    justify-content: center;
+  }
+}
+.landing-sample-note {
+  display: block;
+  margin-top: 24px;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+@media (max-width: 760px) {
+  .landing-hero-scene {
+    padding-block: 28px 40px;
+  }
+  .landing-hero-scene h1 {
+    font-size: clamp(38px, 7.7vw, 60px);
+  }
+  .landing-hero-scene .landing-hero-copy > p {
+    font-size: 16px;
+    max-width: 32ch;
+  }
+  .landing-hero-scene .landing-actions {
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .planning-stage {
+    margin-top: 8px;
+  }
+  .planning-scene figcaption {
+    position: static;
+    padding-inline: 0;
+    align-items: start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .planning-scene figcaption > span {
+    font-size: var(--text-xs);
+  }
+  .planning-play {
+    min-height: 44px;
+  }
+  .landing-voice-section {
+    padding-block: 64px;
+  }
+  .voice-preview-navigation {
+    gap: 16px;
+    align-items: start;
+  }
+  .voice-preview-navigation > span:last-child {
+    font-size: var(--text-xs);
+  }
+  .voice-preview-content {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 24px;
+    gap: 28px;
+  }
+  .voice-preview-order {
+    border: 0;
+    padding: 0 0 24px;
+    border-bottom: 1px solid var(--color-rule);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+  }
+  .voice-preview-order > span,
+  .voice-preview-order h3,
+  .voice-preview-order > p,
+  .voice-preview-order > a {
+    grid-column: 1 / -1;
+  }
+  .voice-preview-order > div,
+  .voice-preview-order > p,
+  .voice-preview-order > a {
+    margin-top: 8px;
+  }
+  .voice-preview-question {
+    padding: 16px;
+  }
+  .voice-preview-response .agent-streaming-text {
+    font-size: 16px;
+  }
+  .voice-preview-choices {
+    gap: 8px;
+  }
+  .voice-preview-choices button {
+    padding-inline: 12px;
+    font-size: var(--text-xs);
+  }
+  .landing-explore {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 72px;
+    gap: 36px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .planning-play:active,
+  .voice-preview-choices button:active {
+    transform: none;
+  }
+}
+
+.planning-play {
+  width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  justify-content: center;
+  border-color: transparent;
+}
+.planning-play:hover {
+  border-color: var(--color-rule);
+}
+
+/* Hallmark ? answered 25: short product ledes are intentionally narrower than long-form prose. */
+
+.signin-illustration { margin-top: 24px; max-width: 560px; }
+.signin-illustration .planning-stage { max-height: 360px; }
+.signin-illustration .planning-scene figcaption { position: static; padding-inline: 0; }
+@media (max-width: 760px) { .signin-illustration { max-width: 400px; margin-inline: auto; } .signin-illustration .planning-stage { max-height: 240px; } }
+
+.signin-copy > .signin-illustration { margin-top: 0; margin-bottom: 32px; }
+.signin-illustration .planning-stage { max-height: 300px; }
+.signin-illustration figcaption > span { font-size: var(--text-xs); }

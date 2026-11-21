@@ -15,6 +15,12 @@ test("confirmed submission is forced only until its tool result arrives", () => 
 });
 
 const ask = { role: "assistant", content: "Sizes are S 120, M 180, L 180, XL 120. Split freight cost is unavailable. Shall I submit this proposal?" };
+test("yes accepts the exact confirmation instruction from the reported live transcript", () => {
+  const prompt = { role: "assistant", content: "Please say Yes, submit the proposal, or use the workspace Submit proposal control to confirm." };
+  assert.equal(submissionConsent([prompt, { role: "user", content: "Yes." }]).allowed, true);
+  assert.equal(submissionConsent([prompt, { role: "user", content: "Yes, but explain the costs first." }]).allowed, false);
+  assert.equal(submissionConsent([{ role: "assistant", content: "Yes, that line is busy." }, { role: "user", content: "Yes." }]).allowed, false);
+});
 test("explanation and selection are not submission consent, even after an earlier confirmation question", () => {
   for (const content of [
     "Select the splits shipment. Explain the size and cost before submitting.",

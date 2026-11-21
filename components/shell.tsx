@@ -15,6 +15,8 @@ import {
 import { Button } from "./ui/button";
 import { useWorkspace } from "./workspace-provider";
 import { browserClient } from "@/lib/supabase/browser";
+import { ThemeToggle } from "./theme-toggle";
+import { CompanyMark } from "./company-mark";
 export function Wordmark() {
   return (
     <span className="wordmark">
@@ -66,6 +68,7 @@ export function Shell({
           ))}
         </nav>
         <div className="topbar-end">
+          <ThemeToggle />
           <span className="product-descriptor">
             <AudioLines size={15} />
             Voice AI for garment decisions
@@ -97,9 +100,7 @@ function WorkspaceBar() {
     <>
       <div className="context-bar">
         <span>
-          <span className="company-mark">
-            {workspace.organization.name.charAt(0)}
-          </span>
+          <CompanyMark name={workspace.organization.name} />
           {workspace.organization.name}
           <ChevronDown size={14} />
           {workspace.organization.is_sample && (

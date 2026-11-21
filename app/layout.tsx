@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Suspense } from "react";
+import { themeScript } from "@/lib/theme";
 export const metadata: Metadata = {
   title: { default: "Nool / Garment order decisions", template: "%s / Nool" },
   description:
@@ -12,19 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head>
       <body>
-        <Suspense
-          fallback={
-            <div className="loading-state main-container" role="status">
-              <div className="skeleton skeleton-title" />
-              <div className="skeleton skeleton-row" />
-              <p>Loading Nool workspace…</p>
-            </div>
-          }
-        >
-          {children}
-        </Suspense>
+        {children}
       </body>
     </html>
   );

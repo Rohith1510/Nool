@@ -1,4 +1,5 @@
 "use client";
+import { CompanyIdentity } from "./company-mark";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -149,7 +150,12 @@ export function OrdersScreen() {
                         #{o.reference}
                       </Link>
                       <span className="cell-secondary">
-                        {w.buyers.find((b) => b.id === o.buyer_id)?.name}
+                        <CompanyIdentity
+                          name={
+                            w.buyers.find((b) => b.id === o.buyer_id)?.name ??
+                            "Unknown buyer"
+                          }
+                        />
                       </span>
                     </td>
                     <td>

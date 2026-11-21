@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
 import { browserClient } from "@/lib/supabase/browser";
 import { Button } from "./ui/button";
+import { PlanningFigure } from "./planning-figure";
 export function SignIn({ configured }: { configured: boolean }) {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
@@ -14,6 +15,9 @@ export function SignIn({ configured }: { configured: boolean }) {
   return (
     <div className="signin-layout">
       <div className="signin-copy">
+        <div className="signin-illustration">
+          <PlanningFigure variant="garment-rack" />
+        </div>
         <span className="thread-rule" />
         <h1>
           Make the next

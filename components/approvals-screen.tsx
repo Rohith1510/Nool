@@ -1,4 +1,5 @@
 "use client";
+import { CompanyIdentity } from "./company-mark";
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -81,7 +82,12 @@ export function ApprovalsScreen() {
                     </span>
                   </div>
                   <strong>
-                    {w.buyers.find((b) => b.id === o.buyer_id)?.name}
+                    <CompanyIdentity
+                      name={
+                        w.buyers.find((b) => b.id === o.buyer_id)?.name ??
+                        "Unknown buyer"
+                      }
+                    />
                   </strong>
                   <span className="small">
                     {p.target_quantity} pieces / {p.plan.title}

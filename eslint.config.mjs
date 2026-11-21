@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".hallmark/hairline-create/**",
+    "public/figures/hairline-kernel.js",
   ]),
 ]);
 

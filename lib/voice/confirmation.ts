@@ -33,8 +33,8 @@ export function submissionConsent(messages: Record<string, unknown>[]) {
   const turn = fingerprint(messages.filter((m) => m.role === "user").map((m) => m.content));
   const explicit = /^(?:yes\s+|please\s+|yes please\s+)?submit (?:(?:that |this |the )?(?:proposal|plan|change)(?: for production approval| for approval)?|for (?:production )?approval)(?: please)?$/.test(text);
   const priorAssistant = messages.slice(0, lastUser).findLast((m) => m.role === "assistant" && messageText(m.content));
-  const asked = /(?:shall|should|may|can) i submit|would you like me to submit|confirm.{0,30}submit/i.test(messageText(priorAssistant?.content) ?? "");
-  return { turn, allowed: explicit || (asked && /^(yes|yes please|confirm|confirmed|go ahead)$/.test(text)) };
+  const asked = /(?:shall|should|may|can) i submit|would you like me to submit|confirm.{0,30}submit|please say\s+["“]?yes[,.]?\s+submit (?:the |this |that )?proposal/i.test(messageText(priorAssistant?.content) ?? "");
+  return { turn, text, allowed: explicit || (asked && /^(yes|yes please|confirm|confirmed|go ahead)$/.test(text)) };
 }
 
 export function canSubmitVoice(state: unknown, requestKey: string, plan: unknown, evaluation: unknown) {

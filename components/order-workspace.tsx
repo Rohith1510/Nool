@@ -1,4 +1,5 @@
 "use client";
+import { CompanyMark } from "./company-mark";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -162,9 +163,7 @@ function OrderContent({
       </div>
       <div className="order-heading">
         <div className="order-identity">
-          <span className="garment-icon">
-            <Shirt size={28} strokeWidth={1.3} />
-          </span>
+          <CompanyMark name={buyer.name} size={56} />
           <div>
             <h1>{buyer.name}</h1>
             <div className="order-heading-meta">

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const messages = input.messages.map(object);
     const consent = submissionConsent(messages);
     const maySubmit = consent.allowed && session.selected_plan_key && object(session.tool_state)._selectionUserTurn && object(session.tool_state)._selectionUserTurn !== consent.turn;
-    await updateVoiceState(session.id, (state) => ({ ...state, _latestUserTurn: consent.turn, _submissionCheck: { recognized: consent.allowed, planSelected: Boolean(session.selected_plan_key), selectionRecorded: Boolean(object(session.tool_state)._selectionUserTurn), separateTurn: object(session.tool_state)._selectionUserTurn !== consent.turn, enabled: Boolean(maySubmit) } }));
+    await updateVoiceState(session.id, (state) => ({ ...state, _latestUserTurn: consent.turn, _submissionCheck: { normalizedText: consent.text.slice(0, 300), recognized: consent.allowed, planSelected: Boolean(session.selected_plan_key), selectionRecorded: Boolean(object(session.tool_state)._selectionUserTurn), separateTurn: object(session.tool_state)._selectionUserTurn !== consent.turn, enabled: Boolean(maySubmit) } }));
     const payload = JSON.stringify({
       model: process.env.GEMINI_MODEL,
       messages: restoreSignatures(input.messages.map(object), object(object(session.tool_state)._llmToolMetadata)),

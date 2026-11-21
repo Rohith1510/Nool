@@ -1,5 +1,8 @@
 ﻿"use client";
 import Link from "next/link";
+import { VoiceOrb, type VoiceOrbState } from "./hairline/voice-orb";
+import { ToolCall, type ToolCallStatus } from "./hairline/tool-call";
+import { StreamingText } from "./hairline/streaming-text";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AudioLines,
@@ -16,6 +19,8 @@ import type { Evaluation, Order, Proposal } from "@/lib/domain";
 import { TranscriptDecoder, type Transcript } from "@/lib/voice/transcripts";
 import { api, useWorkspace } from "./workspace-provider";
 import { Button } from "./ui/button";
+const orbColors: [string, string, string] = ["var(--color-orb-deep)", "var(--color-orb-stream)", "var(--color-orb-core)"];
+type ToolActivity = { id: string; title: string; status: ToolCallStatus; error?: string };
 type Session = {
   id: string;
   channel: string;
@@ -26,7 +31,7 @@ type Session = {
 };
 type SessionState = {
   status: string;
-  tool_state: { running?: boolean; operation?: string };
+  tool_state: { running?: boolean; operation?: string; at?: string; failed?: boolean };
   evaluation: Evaluation | null;
   proposal_id: string | null;
   selected_plan_key: string | null;
@@ -60,6 +65,12 @@ export function VoicePanel({
     [lastSessionId, setLastSessionId] = useState<string | null>(null),
     [checking, setChecking] = useState(false),
     [volume, setVolume] = useState(0);
+  const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
+  const [remoteLevel, setRemoteLevel] = useState(0);
+  const remoteAudio = useRef<{ getVolumeLevel: () => number } | null>(null);
+  const transcriptEnd = useRef<HTMLDivElement>(null);
+  const followTranscript = useRef(true);
+  const lastToolState = useRef("");
   const clientRef = useRef<IAgoraRTCClient | null>(null),
     trackRef = useRef<IMicrophoneAudioTrack | null>(null),
     sessionRef = useRef<Session | null>(null),
@@ -86,6 +97,7 @@ export function VoicePanel({
     };
   }, [onEvaluation, onProposal, onPlanSelected, refresh, w]);
   const release = useCallback(async () => {
+    remoteAudio.current = null;
     const track = trackRef.current;
     trackRef.current = null;
     track?.stop();
@@ -129,6 +141,9 @@ export function VoicePanel({
     }
   }, [release]);
   useEffect(() => {
+    if (followTranscript.current) transcriptEnd.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+  }, [messages, toolActivity]);
+  useEffect(() => {
     if (waitingSince === null) return;
     const timer = setInterval(
       () => setWaitSeconds(Math.floor((Date.now() - waitingSince) / 1000)),
@@ -167,6 +182,19 @@ export function VoicePanel({
             ? (s.tool_state.operation ?? "Checking order records")
             : "",
         );
+        if (s.tool_state.operation && s.tool_state.at) {
+          const stamp = JSON.stringify(s.tool_state);
+          if (lastToolState.current !== stamp) {
+            lastToolState.current = stamp;
+            const title = s.tool_state.operation;
+            const status: ToolCallStatus = s.tool_state.failed ? "error" : s.tool_state.running ? "running" : "done";
+            setToolActivity((previous) => {
+              const last = previous.at(-1);
+              const item = { id: last?.status === "running" && last.title === title ? last.id : s.tool_state.at!, title, status, error: s.tool_state.failed ? s.last_error ?? undefined : undefined };
+              return (last?.status === "running" && last.title === title ? [...previous.slice(0, -1), item] : [...previous, item]).slice(-12);
+            });
+          }
+        }
         if (s.last_error) setError(s.last_error);
         if (s.evaluation) {
           const signature = JSON.stringify(s.evaluation);
@@ -221,7 +249,7 @@ export function VoicePanel({
       Math.max(1, Date.parse(session.expires_at) - Date.now()),
     );
     const meter = setInterval(
-      () => setVolume(trackRef.current?.getVolumeLevel() ?? 0),
+      () => { setVolume(trackRef.current?.getVolumeLevel() ?? 0); setRemoteLevel(remoteAudio.current?.getVolumeLevel() ?? 0); },
       150,
     );
     return () => {
@@ -290,7 +318,7 @@ export function VoicePanel({
       rtc.on("user-published", async (user, type) => {
         try {
           await rtc.subscribe(user, type);
-          if (type === "audio") user.audioTrack?.play();
+          if (type === "audio") { remoteAudio.current = user.audioTrack ?? null; user.audioTrack?.play(); }
         } catch {
           if (mounted.current)
             setError(
@@ -330,6 +358,8 @@ export function VoicePanel({
       setSession(result);
       setLastSessionId(result.id);
       setMessages([]);
+      setToolActivity([]);
+      lastToolState.current = "";
       await rtc.join(result.app_id, result.channel, result.token, result.uid);
       await rtc.publish(track);
       setState("connected");
@@ -346,6 +376,7 @@ export function VoicePanel({
     }
   };
   const connected = state === "connected" || state === "reconnecting";
+  const orbState: VoiceOrbState = !connected || muted ? "idle" : remoteLevel > 0.025 ? "speaking" : operation || waitingSince !== null ? "thinking" : "listening";
   return (
     <aside className="voice-panel">
       <div className="voice-header">
@@ -360,9 +391,7 @@ export function VoicePanel({
         </span>
       </div>
       <div className="voice-intro">
-        <span className="voice-emblem">
-          <AudioLines size={35} strokeWidth={1} />
-        </span>
+        <VoiceOrb state={orbState} level={orbState === "speaking" ? remoteLevel : volume} size={112} colors={orbColors} label="Nool voice" />
         <h3>
           A conversation.
           <br />
@@ -463,6 +492,7 @@ export function VoicePanel({
           </Button>
         </div>
       )}
+      {toolActivity.length > 0 && <div className="agent-tool-history" aria-label="Tool activity">{toolActivity.map((activity) => <ToolCall key={activity.id} title={activity.title} status={activity.status}>{activity.error}</ToolCall>)}</div>}
       {operation && (
         <div className="tool-progress" role="status">
           <Loader2 size={15} className="spin" />
@@ -531,6 +561,7 @@ export function VoicePanel({
             className="transcript-messages"
             aria-live="polite"
             aria-relevant="additions text"
+            onScroll={(event) => { const el = event.currentTarget; followTranscript.current = el.scrollHeight - el.scrollTop - el.clientHeight < 64; }}
           >
             {messages.map((m) => (
               <div
@@ -538,10 +569,10 @@ export function VoicePanel({
                 key={m.id}
               >
                 <span>{m.role === "user" ? "You" : "Nool"}</span>
-                <p>{m.text}</p>
-                {!m.final && <small>Transcribing...</small>}
+                <StreamingText content={m.text} streaming={!m.final} />
               </div>
             ))}
+            <div ref={transcriptEnd} />
           </div>
         ) : (
           <div className="transcript-empty">

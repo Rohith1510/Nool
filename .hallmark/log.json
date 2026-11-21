@@ -1,5 +1,37 @@
 [
   {
+    "date": "2026-11-21",
+    "scope": "page",
+    "shape": "illustrated product story",
+    "theme": "custom Nool brand",
+    "axes": "light+dark/grotesk/cool",
+    "hero": "Counter with user-selected isometric garment table",
+    "nav": "edge-aligned",
+    "footer": "garment commitment",
+    "imagery": "Hairline-create illustration selected by user; illustrative conversation; real calculation sample",
+    "signature": "Folded garments move from production to two dispatch trays; autoplay while visible with accessible pause and reduced-motion fallback",
+    "sections": [
+      "Illustrated hero",
+      "Stored production facts",
+      "Approval boundary",
+      "Illustrative voice workbench",
+      "Interactive sample calculation",
+      "Questions",
+      "Garment commitment close"
+    ],
+    "waived": [],
+    "reviews": {
+      "hero": "3 findings resolved: scale, contrast, touch",
+      "finish": "1 glyph defect resolved"
+    },
+    "checks": {
+      "hallmark": "0 FAIL / 0 REFLEX; three short-lede measure warnings assessed",
+      "hairline": "kernel/bench intact; eight views; bounds, no flicker, console, readout checked",
+      "browser": "theme, previews, responsive, no-JS, autoplay/reduced motion checked"
+    },
+    "prompt": "Nool landing page, platform dark mode, Hairline UI voice presentation; user selected Hairline-create garment planning table and requested autoplay without Explore scene CTA."
+  },
+  {
     "scope": "app",
     "shape": "app screen",
     "theme": "custom",
@@ -8,7 +40,14 @@
     "footer": "quiet operational note",
     "imagery": "product itself",
     "signature": "Shipment plan comparison grounded in fabric and dated capacity with persistent live conversation",
-    "sections": ["Orders", "Order workspace", "Production", "Materials", "Approvals", "Setup and account"],
+    "sections": [
+      "Orders",
+      "Order workspace",
+      "Production",
+      "Materials",
+      "Approvals",
+      "Setup and account"
+    ],
     "waived": [],
     "prompt": "Nool garment order decision workspace; ivory, charcoal, restrained indigo, Instrument Sans, IBM Plex Mono."
   }

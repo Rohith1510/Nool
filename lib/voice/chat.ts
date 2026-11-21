@@ -24,7 +24,7 @@ export function captureSignatures(message: ObjectValue, previous: ObjectValue) {
 }
 export function publicProgress(value: unknown) {
   const state = object(value);
-  return { operation: state.operation, running: state.running, at: state.at };
+  return { operation: state.operation, running: state.running, at: state.at, ...(state.failed === true ? { failed: true } : {}) };
 }
 export function completionEvents(completion: ObjectValue) {
   const choice = object((completion.choices as unknown[])?.[0]);

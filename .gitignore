@@ -35,6 +35,7 @@ yarn-error.log*
 !.env.example
 /.hallmark/shots/
 /.hallmark/browser-profile/
+/.hallmark/hairline-create/
 /.hallmark-lint.json
 /playwright-report/
 /test-results/

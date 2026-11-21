@@ -1,0 +1,130 @@
+/* Hallmark · shape: app screen · theme: Nool existing brand · genre: modern-minimal · modes: light+dark · v2.0.0 */
+/* Hallmark · critique: keep operational hierarchy; derive dark surfaces and contrast independently. */
+:root {
+  color-scheme: light dark;
+  --color-orb-highlight: #f3f4fb;
+  --color-orb-shadow: #0e1220;
+  --color-orb-deep: #344281;
+  --color-orb-stream: #8e9ed7;
+  --color-orb-core: #e6eaff;
+  --color-transcript-user: #e9ebf3;
+}
+:root[data-mode="light"] {
+  color-scheme: light;
+}
+:root[data-mode="dark"] {
+  color-scheme: dark;
+  --color-paper: #15181e;
+  --color-paper-2: #20252e;
+  --color-paper-3: #2b303c;
+  --color-surface: #1e222c;
+  --color-ink: #ebece8;
+  --color-ink-2: #c4c8cc;
+  --color-muted: #aaafb8;
+  --color-rule: #3a414d;
+  --color-field-border: #737e8d;
+  --color-accent: #a3afe9;
+  --color-accent-hover: #bec7f4;
+  --color-accent-light: #2a324f;
+  --color-accent-ink: #1b2140;
+  --color-focus: #a3afe9;
+  --color-success: #a7dbb9;
+  --color-success-bg: #20372d;
+  --color-warning: #edc98b;
+  --color-warning-bg: #3b3020;
+  --color-error: #f3afa4;
+  --color-error-bg: #3d2729;
+  --color-transcript-user: #2a3244;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]) {
+    --color-paper: #15181e;
+    --color-paper-2: #20252e;
+    --color-paper-3: #2b303c;
+    --color-surface: #1e222c;
+    --color-ink: #ebece8;
+    --color-ink-2: #c4c8cc;
+    --color-muted: #aaafb8;
+    --color-rule: #3a414d;
+    --color-field-border: #737e8d;
+    --color-accent: #a3afe9;
+    --color-accent-hover: #bec7f4;
+    --color-accent-light: #2a324f;
+    --color-accent-ink: #1b2140;
+    --color-focus: #a3afe9;
+    --color-success: #a7dbb9;
+    --color-success-bg: #20372d;
+    --color-warning: #edc98b;
+    --color-warning-bg: #3b3020;
+    --color-error: #f3afa4;
+    --color-error-bg: #3d2729;
+    --color-transcript-user: #2a3244;
+  }
+}
+@theme inline {
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-muted-foreground: var(--color-muted);
+  --color-border: var(--color-rule);
+  --color-ring: var(--color-focus);
+  --font-sans: var(--font-body);
+}
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  background: var(--color-paper-3);
+}
+.theme-toggle:active {
+  transform: scale(0.96);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.theme-toggle svg {
+  grid-area: 1 / 1;
+}
+.theme-moon {
+  display: none;
+}
+[data-mode="dark"] .theme-sun {
+  display: none;
+}
+[data-mode="dark"] .theme-moon {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode]) .theme-sun {
+    display: none;
+  }
+  :root:not([data-mode]) .theme-moon {
+    display: block;
+  }
+}
+html {
+  scrollbar-color: var(--color-field-border) var(--color-paper);
+}
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+input,
+textarea {
+  caret-color: var(--color-accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle:active {
+    transform: none;
+  }
+}

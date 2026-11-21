@@ -30,7 +30,7 @@ export async function POST(
       createChangeProposal: "Preparing change proposal",
     };
     if (!names[name]) throw new Error("Unknown voice tool.");
-    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], running: true, at: new Date().toISOString() }));
+    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], failed: false, running: true, at: new Date().toISOString() }));
     await db.from("voice_sessions").update({ last_error: null }).eq("id", id);
     const { data: snapshot, error } = await db.rpc("workspace_snapshot", {
       p_org: session.organization_id,
@@ -165,7 +165,7 @@ export async function POST(
         if (saveError) throw new Error(saveError.message);
       }
     }
-    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], running: false, at: new Date().toISOString() }));
+    await updateVoiceState(session.id, (state) => ({ ...state, operation: names[name], failed: false, running: false, at: new Date().toISOString() }));
     return Response.json({ ok: true, result });
   } catch (e) {
     if (id)
@@ -176,7 +176,7 @@ export async function POST(
 
         })
         .eq("id", id);
-    if (id) await updateVoiceState(id, (state) => ({ ...state, running: false })).catch(() => {});
+    if (id) await updateVoiceState(id, (state) => ({ ...state, running: false, failed: true, at: new Date().toISOString() })).catch(() => {});
     return apiError(e);
   }
 }

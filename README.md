@@ -2,6 +2,16 @@
 
 Voice AI for garment order decisions. A Next.js 16 workspace backed by Supabase PostgreSQL, Auth, and Realtime. Compare deterministic shipment plans, submit a versioned proposal, and have production approve the resource changes atomically.
 
+For the product walkthrough, real-versus-sample breakdown, provider roles, demo script, and presentation questions, see [Workflow and presentation guide](README-WORKFLOW.md).
+
+## Landing page and appearance
+
+The home route is public. Its interactive garment planning table uses the [Hairline create skill](https://hairline.lucasmarkes.com/skills) and the unchanged, MIT-licensed Hairline engine. The scene is an illustration, not a factory feed. The scene autoplays while visible, pauses on hover/focus or with its discreet pause control, and honors reduced motion. Hover/tap a tray to explore directly. A standalone version is available at `/figures/hairline-planning-table.html`.
+
+The conversation preview is explicitly illustrative and starts no voice session. The separate capacity preview recalculates the seeded scenario with the real TypeScript engine and performs no database writes. Operational screens still read Supabase.
+
+The shared header provides a persistent light/dark toggle, defaulting to the operating system until a preference is saved. Live voice uses Hairline UI's adapted orb, transcript and tool-call components with actual RTC levels and backend operation states. Third-party licenses are retained in `components/hairline/LICENSE` and `public/figures/LICENSE`.
+
 ## Run locally
 
 Requires Node.js 22+ and npm. On Windows PowerShell with script restrictions, use `npm.cmd` instead of `npm`.
@@ -108,3 +118,7 @@ Import the existing GitHub repository into Vercel, use the Next.js preset, and s
 Voice submission consent is checked outside the model: the user must confirm in a new turn after plan selection. The relay grants a short-lived submission permission bound to the tool-call ID, user turn, selected plan and evaluation fingerprint. The callback rejects a model-only `confirmed: true`. Requests to explain costs before submitting never authorize a write. Ambiguous speech requires another question or the ordinary confirmation controls.
 
 The confirmation parser accepts both string and OpenAI text-part content. On valid consent for a previously selected plan, the relay requires the submission function call; after its tool result arrives it returns to ordinary replies. Private `_submissionCheck` flags record the gate decision without storing transcript text.
+
+Submission diagnostics retain up to 300 characters of the latest normalized confirmation text in private voice-session state, alongside gate flags. This supports distinguishing ASR wording from parser failures; only service-side debugging can read this snippet. A bare Yes is accepted after either the normal submission question or the explicit Please say Yes, submit the proposal instruction.
+
+A local production-server verification on 2026-11-20 sent the exact Please say Yes, submit the proposal confirmation prompt followed by Yes through the LLM relay. Real Gemini returned the submission function, the authenticated callback persisted a pending 600-piece sample proposal, and a repeated callback returned the same proposal ID. This tests the relay/callback/Supabase path, not live microphone recognition. The diagnostic voice session was ended; the proposal remains pending for inspection.
